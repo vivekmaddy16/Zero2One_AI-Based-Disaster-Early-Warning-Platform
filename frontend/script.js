@@ -10,6 +10,49 @@ const USE_BACKEND = true; // Set to true to use backend, false for direct API ca
 let map = null;
 let markerGroup = null;
 
+// Simple client-side auth (demo). Replace with real auth as needed.
+const AUTH_TOKEN_KEY = 'disasterAuth';
+const AUTH_USER_KEY = 'disasterUser';
+const DEMO_USERNAME = 'admin';
+const DEMO_PASSWORD = 'password';
+
+function isAuthenticated() {
+    return !!localStorage.getItem(AUTH_TOKEN_KEY);
+}
+
+function ensureAuthOrRedirect() {
+    // If user is not authenticated and not on login page, redirect to login
+    const path = window.location.pathname;
+    if (!isAuthenticated() && !path.endsWith('login.html')) {
+        window.location.href = 'login.html';
+        return false;
+    }
+    // If authenticated and currently on login page, go to index
+    if (isAuthenticated() && path.endsWith('login.html')) {
+        window.location.href = 'index.html';
+        return false;
+    }
+    return true;
+}
+
+function login(username, password) {
+    if (username === DEMO_USERNAME && password === DEMO_PASSWORD) {
+        // set a simple token
+        localStorage.setItem(AUTH_TOKEN_KEY, 'token_demo_123');
+        localStorage.setItem(AUTH_USER_KEY, username);
+        window.location.href = 'index.html';
+        return true;
+    }
+    showNotification('Invalid username or password', 'error');
+    return false;
+}
+
+function logout() {
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(AUTH_USER_KEY);
+    window.location.href = 'login.html';
+}
+
 // Disaster zones with real coordinates (India)
 const DISASTER_ZONES = [
     { name: 'North Delhi - Flood Risk', lat: 28.7041, lon: 77.1025, type: 'flood', severity: 'critical', message: 'Flash flood warning' },
@@ -22,6 +65,7 @@ const DISASTER_ZONES = [
 
 // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', function() {
+    if (!ensureAuthOrRedirect()) return;
     initializeApp();
 });
 
@@ -331,6 +375,15 @@ function setupEventListeners() {
             shareOnSocial(platform);
         });
     });
+
+    // Logout button (if present)
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            logout();
+        });
+    }
 }
 
 // Live Monitoring Function

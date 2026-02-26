@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - DisasterGuard AI</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <main class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                    <div class="logo-circle"><i class="fas fa-shield-alt"></i></div>
+                    <h2>DisasterGuard AI</h2>
+                    <p class="sub">Secure access to the early warning dashboard</p>
+                </div>
+                <form id="loginForm" class="login-form">
+                    <div class="input-group">
+                        <span class="icon"><i class="fas fa-user"></i></span>
+                        <input id="username" name="username" type="text" placeholder="Username" required>
+                    </div>
+
+                    <div class="input-group">
+                        <span class="icon"><i class="fas fa-lock"></i></span>
+                        <input id="password" name="password" type="password" placeholder="Password" required>
+                    </div>
+
+                    <div class="row between">
+                        <label class="remember"><input type="checkbox" id="remember"> Remember me</label>
+                        <a href="#" class="forgot">Forgot?</a>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Sign In</button>
+                </form>
+                <p class="login-note">Demo: username <strong>admin</strong> / password <strong>password</strong></p>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"></script>
+    <script src="script.js"></script>
+    <script>
+        // Wire login form to client-side login function
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('loginForm');
+            if (!form) return;
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value;
+                login(username, password);
+            });
+        });
+    </script>
+</body>
+</html>
