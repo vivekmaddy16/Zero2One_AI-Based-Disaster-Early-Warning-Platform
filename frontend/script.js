@@ -69,6 +69,48 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
+// Typing animation for login page
+function typeEffect(el, strings, speed = 60, pause = 1400) {
+    let idx = 0, pos = 0, forward = true;
+    el.textContent = '';
+
+    function step() {
+        const current = strings[idx];
+        if (forward) {
+            pos++;
+            el.textContent = current.slice(0, pos);
+            if (pos === current.length) {
+                forward = false;
+                setTimeout(step, pause);
+                return;
+            }
+        } else {
+            pos--;
+            el.textContent = current.slice(0, pos);
+            if (pos === 0) {
+                forward = true;
+                idx = (idx + 1) % strings.length;
+            }
+        }
+        setTimeout(step, forward ? speed : Math.max(30, speed / 2));
+    }
+    step();
+}
+
+// Start typing if on login page
+document.addEventListener('DOMContentLoaded', () => {
+    const typed = document.getElementById('typed');
+    if (typed) {
+        try {
+            const raw = typed.getAttribute('data-strings');
+            const arr = JSON.parse(raw);
+            typeEffect(typed, arr, 55, 1500);
+        } catch (e) {
+            console.error('Typing effect parse error', e);
+        }
+    }
+});
+
 // Main initialization function
 function initializeApp() {
     setupEventListeners();
@@ -864,3 +906,21 @@ function shareOnSocial(platform) {
     showNotification(`Sharing on ${platform}`, 'info');
     console.log('Share on:', platform);
 }
+
+// Toggle show/hide password on login page
+document.addEventListener('click', function(e) {
+    const t = e.target;
+    if (t && t.classList && t.classList.contains('toggle-password')) {
+        const pg = t.closest('.password-group');
+        if (!pg) return;
+        const input = pg.querySelector('input');
+        if (!input) return;
+        if (input.type === 'password') {
+            input.type = 'text';
+            t.textContent = 'HIDE';
+        } else {
+            input.type = 'password';
+            t.textContent = 'SHOW';
+        }
+    }
+});

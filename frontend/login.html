@@ -8,36 +8,58 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <main class="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                    <div class="logo-circle"><i class="fas fa-shield-alt"></i></div>
-                    <h2>DisasterGuard AI</h2>
-                    <p class="sub">Secure access to the early warning dashboard</p>
+    <main class="auth-viewport">
+        <div class="auth-wrap">
+            <section class="auth-left">
+                <div class="brand-large">
+                    <h1>WELCOME</h1>
+                    <h3>DisasterGuard AI</h3>
+                    <p class="lead">Real-time monitoring and predictive alerts to protect communities.</p>
                 </div>
-                <form id="loginForm" class="login-form">
-                    <div class="input-group">
-                        <span class="icon"><i class="fas fa-user"></i></span>
-                        <input id="username" name="username" type="text" placeholder="Username" required>
+                <div class="decor-circles">
+                    <div class="circle c1"></div>
+                    <div class="circle c2"></div>
+                    <div class="circle c3"></div>
+                </div>
+            </section>
+
+            <section class="auth-right">
+                <div class="login-card">
+                    <div class="login-top">
+                        <div class="logo-circle"><i class="fas fa-shield-alt"></i></div>
+                        <h2>Sign in</h2>
+                        <p class="sub"><span id="typed" data-strings='["Secure access to the early warning dashboard","Real-time alerts & insights","Protecting communities with AI"]'></span><span class="type-cursor">&nbsp;</span></p>
                     </div>
 
-                    <div class="input-group">
-                        <span class="icon"><i class="fas fa-lock"></i></span>
-                        <input id="password" name="password" type="password" placeholder="Password" required>
-                    </div>
+                    <form id="loginForm" class="login-form">
+                        <div class="input-group">
+                            <span class="icon"><i class="fas fa-user"></i></span>
+                            <input id="username" name="username" type="text" placeholder="User Name" required>
+                        </div>
 
-                    <div class="row between">
-                        <label class="remember"><input type="checkbox" id="remember"> Remember me</label>
-                        <a href="#" class="forgot">Forgot?</a>
-                    </div>
+                        <div class="input-group password-group">
+                            <span class="icon"><i class="fas fa-lock"></i></span>
+                            <input id="password" name="password" type="password" placeholder="Password" required>
+                            <button type="button" class="toggle-password">SHOW</button>
+                        </div>
 
-                    <button type="submit" class="btn btn-primary">Sign In</button>
-                </form>
-                <p class="login-note">Demo: username <strong>admin</strong> / password <strong>password</strong></p>
+                        <div class="row between">
+                            <label class="remember"><input type="checkbox" id="remember"> Remember me</label>
+                            <a href="#" class="forgot">Forgot Password?</a>
+                        </div>
+
+                        <button type="submit" class="btn-primary big">Sign in</button>
+
+                        <div class="divider"><span>Or</span></div>
+                        <button type="button" class="btn-outline">Sign in with other</button>
+                    </form>
+
+                    <p class="login-note">Demo: username <strong>admin</strong> / password <strong>password</strong></p>
+                </div>
+            </section>
         </div>
     </main>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"></script>
     <script src="script.js"></script>
     <script>
         // Wire login form to client-side login function
