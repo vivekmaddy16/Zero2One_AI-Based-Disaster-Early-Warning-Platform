@@ -1,10 +1,10 @@
 # Zero2One_AI-Based-Disaster-Early-Warning-Platform
 
-Team Name - Zero2One 
-Project name - AI-Based-Disaster-Early-Warning-Platform
-Problem statements- AI-Based-Disaster-Early-Warning-Platform
-track - 1 
-team lead - Vivek Maddheshiya
-Team member- aniket kumar , yogesh singh
+Team Name - Zero2One <br>
+Project name - AI-Based-Disaster-Early-Warning-Platform <br>
+Problem statements- AI-Based-Disaster-Early-Warning-Platform <br>
+track - 1 <br>
+team lead - Vivek Maddheshiya <br>
+Team member- aniket kumar , yogesh singh <br>
 
 
