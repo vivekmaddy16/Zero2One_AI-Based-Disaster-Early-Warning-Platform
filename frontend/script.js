@@ -39,85 +39,222 @@ function initializeApp() {
 // Initialize Real Map with Leaflet
 function initializeMap() {
     // Create map centered on India
-    map = L.map('realMap').setView([20.5937, 78.9629], 5);
+    map = L.map('realMap', {
+        zoomControl: true,
+        attributionControl: true,
+        preferCanvas: true
+    }).setView([20.5937, 78.9629], 5);
     
-    // Add OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19
-    }).addTo(map);
+    // Map Layers - Professional looking like Google Maps
+    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data © OpenStreetMap contributors',
+        maxZoom: 19,
+        className: 'osm-layer'
+    });
     
-    // Create marker group
+    const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles © Esri',
+        maxZoom: 18,
+        className: 'satellite-layer'
+    });
+    
+    const tonerLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data: OpenStreetMap contributors, SRTM',
+        maxZoom: 17,
+        className: 'terrain-layer'
+    });
+    
+    const darkLayer = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+        attribution: '© Stadia Maps © OpenMapTiles © OpenStreetMap contributors',
+        maxZoom: 20,
+        className: 'dark-layer'
+    });
+    
+    // Set default layer
+    osmLayer.addTo(map);
+    
+    // Layer control - Professional styling
+    const baseMaps = {
+        '<span style="color: #333;">🌍 Street Map</span>': osmLayer,
+        '<span style="color: #333;">🛰️ Satellite</span>': satelliteLayer,
+        '<span style="color: #333;">🏔️ Terrain</span>': tonerLayer,
+        '<span style="color: #333;">🌙 Dark Mode</span>': darkLayer
+    };
+    
+    const layerControl = L.control.layers(baseMaps, {}, {
+        position: 'topright',
+        collapsed: true
+    });
+    layerControl.addTo(map);
+    
+    // Customize zoom control
+    map.zoomControl.setPosition('bottomright');
+    
+    // Create marker group for disasters
     markerGroup = L.featureGroup().addTo(map);
     
-    // Add all disaster zones to map
+    // Add all disaster zones to map with radius circles
     DISASTER_ZONES.forEach((zone, index) => {
-        addDisasterMarker(zone, index);
+        addDisasterMarkerWithRadius(zone, index);
     });
+    
+    // Add search functionality
+    addMapSearch();
+    
+    // Fit markers in view
+    setTimeout(() => {
+        if (markerGroup.getLayers().length > 0) {
+            map.fitBounds(markerGroup.getBounds().pad(0.1));
+        }
+    }, 100);
 }
 
-// Add disaster marker with popup
-function addDisasterMarker(zone, index) {
-    // Determine marker color based on severity
+// Add disaster marker with impact radius circle
+function addDisasterMarkerWithRadius(zone, index) {
     const markerColor = zone.severity === 'critical' ? '#ff4757' : '#ffa502';
+    const circleColor = zone.severity === 'critical' ? '#ff4757' : '#ffa502';
     
-    // Create custom marker HTML
+    // Add radius circle showing impact area
+    const circle = L.circle([zone.lat, zone.lon], {
+        color: circleColor,
+        fillColor: circleColor,
+        fillOpacity: 0.15,
+        weight: 2,
+        radius: 30000, // 30km radius
+        dashArray: '5, 5',
+        className: 'disaster-radius'
+    }).bindPopup(`<strong>${zone.name}</strong><br>Impact Radius: ~30km`);
+    
+    markerGroup.addLayer(circle);
+    
+    // Create custom marker
     const markerHtml = `
-        <div class="custom-marker" style="
+        <div class="custom-marker custom-marker-${zone.severity}" style="
             background-color: ${markerColor};
-            width: 30px;
-            height: 30px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             border: 3px solid white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            font-weight: bold;
             ${zone.severity === 'critical' ? 'animation: blink 1s infinite;' : ''}
         ">
-            <i class="fas fa-exclamation" style="color: white; font-size: 14px;"></i>
+            <i class="fas fa-exclamation" style="color: white; font-size: 16px;"></i>
         </div>
     `;
     
-    // Create marker
     const marker = L.marker([zone.lat, zone.lon], {
         icon: L.divIcon({
             html: markerHtml,
-            iconSize: [36, 36],
+            iconSize: [40, 40],
             className: 'disaster-marker'
         }),
-        title: zone.name
+        title: zone.name,
+        zIndexOffset: zone.severity === 'critical' ? 999 : 0
     });
     
-    // Add popup
+    // Create professional popup
     const popupContent = `
-        <div style="font-size: 12px;">
-            <h4 style="margin: 0 0 5px 0; color: #333;">${zone.name}</h4>
-            <p style="margin: 3px 0; color: #666;">
-                <strong>Type:</strong> ${zone.type.toUpperCase()}
-            </p>
-            <p style="margin: 3px 0; color: #666;">
-                <strong>Severity:</strong> <span style="color: ${zone.severity === 'critical' ? '#ff4757' : '#ffa502'}; font-weight: bold;">${zone.severity.toUpperCase()}</span>
-            </p>
-            <p style="margin: 3px 0; color: #666;">
-                <strong>Alert:</strong> ${zone.message}
-            </p>
-            <p style="margin: 5px 0 0 0; font-size: 11px; color: #999;">
-                Coordinates: ${zone.lat.toFixed(4)}, ${zone.lon.toFixed(4)}
-            </p>
+        <div class="map-popup">
+            <h4>${zone.name}</h4>
+            <div class="popup-content">
+                <div class="popup-row">
+                    <span class="popup-label">Disaster Type:</span>
+                    <span class="popup-value">${zone.type.toUpperCase()}</span>
+                </div>
+                <div class="popup-row">
+                    <span class="popup-label">Severity:</span>
+                    <span class="popup-value" style="color: ${zone.severity === 'critical' ? '#ff4757' : '#ffa502'};">
+                        ${zone.severity.toUpperCase()}
+                    </span>
+                </div>
+                <div class="popup-row">
+                    <span class="popup-label">Alert:</span>
+                    <span class="popup-value">${zone.message}</span>
+                </div>
+                <div class="popup-row">
+                    <span class="popup-label">Coordinates:</span>
+                    <span class="popup-value" style="font-size: 11px;">
+                        ${zone.lat.toFixed(4)}, ${zone.lon.toFixed(4)}
+                    </span>
+                </div>
+                <button class="popup-btn" onclick="createAlertInBackend('${zone.type}', '${zone.severity}', '${zone.name}', '${zone.message}', {lat: ${zone.lat}, lon: ${zone.lon}})">
+                    <i class="fas fa-bell"></i> Create Alert
+                </button>
+            </div>
         </div>
     `;
     
-    marker.bindPopup(popupContent);
-    
-    // Add click event to show alert details
-    marker.on('click', function() {
-        createAlertInBackend(zone.type, zone.severity, zone.name, zone.message, { lat: zone.lat, lon: zone.lon });
+    marker.bindPopup(popupContent, {
+        maxWidth: 300,
+        className: 'custom-popup'
     });
     
-    // Add to marker group
+    // Show popup on critical zones
+    if (zone.severity === 'critical') {
+        marker.bindTooltip(zone.name, {
+            permanent: false,
+            direction: 'top',
+            offset: [0, -15],
+            className: 'disaster-tooltip'
+        });
+    }
+    
     markerGroup.addLayer(marker);
+}
+
+// Add map search functionality
+function addMapSearch() {
+    const searchBox = document.getElementById('mapSearch');
+    if (!searchBox) return;
+    
+    searchBox.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const location = searchBox.value;
+            searchLocation(location);
+        }
+    });
+}
+
+// Search for location
+function searchLocation(locationName) {
+    // Find matching disaster zone
+    const zone = DISASTER_ZONES.find(z => 
+        z.name.toLowerCase().includes(locationName.toLowerCase())
+    );
+    
+    if (zone) {
+        map.setView([zone.lat, zone.lon], 10);
+        markerGroup.eachLayer(layer => {
+            if (layer.getLatLng && 
+                layer.getLatLng().lat === zone.lat && 
+                layer.getLatLng().lng === zone.lon) {
+                setTimeout(() => layer.openPopup(), 300);
+            }
+        });
+        showNotification(`Found: ${zone.name}`, 'success');
+    } else {
+        // Use OpenStreetMap Nominatim API for general location search
+        fetch(`https://nominatim.openstreetmap.org/search?q=${locationName}&format=json&limit=1`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.length > 0) {
+                    const result = data[0];
+                    map.setView([result.lat, result.lon], 12);
+                    L.marker([result.lat, result.lon]).addTo(map)
+                        .bindPopup(`<strong>${result.name}</strong>`)
+                        .openPopup();
+                    showNotification(`Found: ${result.name}`, 'success');
+                } else {
+                    showNotification('Location not found', 'error');
+                }
+            })
+            .catch(err => showNotification('Search error', 'error'));
+    }
 }
 
 // Set user's current location
