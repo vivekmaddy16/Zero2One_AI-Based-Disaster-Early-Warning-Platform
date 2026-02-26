@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <!-- Custom CSS -->
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -208,19 +210,14 @@
         <!-- Map Section -->
         <div class="map-container">
             <div class="card-header">
-                <h3><i class="fas fa-map-marked-alt"></i> Risk Heat Map</h3>
+                <h3><i class="fas fa-map-marked-alt"></i> Real-time Disaster Map</h3>
                 <div class="map-legend">
-                    <span><i class="fas fa-circle" style="color: #ff4757;"></i> Critical</span>
+                    <span><i class="fas fa-circle" style="color: #ff4757;"></i> Critical (Blinking)</span>
                     <span><i class="fas fa-circle" style="color: #ffa502;"></i> Warning</span>
                     <span><i class="fas fa-circle" style="color: #26de81;"></i> Safe</span>
                 </div>
             </div>
-            <div class="map-placeholder" id="riskMap">
-                <div class="map-overlay">
-                    <i class="fas fa-map-marker-alt" style="color: #ff4757;"></i> 3 Critical Zones Identified
-                </div>
-                <div class="map-gradient"></div>
-            </div>
+            <div id="realMap" style="width: 100%; height: 500px; border-radius: 8px; margin-top: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);"></div>
         </div>
 
         <!-- Second Dashboard Row -->
@@ -357,6 +354,8 @@
         </footer>
     </main>
 
+    <!-- Leaflet Map JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <!-- Custom JavaScript -->
     <script src="script.js"></script>
 </body>

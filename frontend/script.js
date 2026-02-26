@@ -6,6 +6,20 @@ const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5/weather';
 const BACKEND_URL = 'http://localhost:5000/api';
 const USE_BACKEND = true; // Set to true to use backend, false for direct API calls
 
+// Map Configuration
+let map = null;
+let markerGroup = null;
+
+// Disaster zones with real coordinates (India)
+const DISASTER_ZONES = [
+    { name: 'North Delhi - Flood Risk', lat: 28.7041, lon: 77.1025, type: 'flood', severity: 'critical', message: 'Flash flood warning' },
+    { name: 'Mumbai - Cyclone Risk', lat: 19.0760, lon: 72.8777, type: 'cyclone', severity: 'warning', message: 'Cyclone approaching coast' },
+    { name: 'Bangalore - Drought', lat: 12.9716, lon: 77.5946, type: 'drought', severity: 'warning', message: 'Water scarcity alert' },
+    { name: 'Chennai - Heatwave', lat: 13.0827, lon: 80.2707, type: 'heatwave', severity: 'critical', message: 'Extreme heat warning' },
+    { name: 'Kolkata - Heavy Rain', lat: 22.5726, lon: 88.3639, type: 'flood', severity: 'warning', message: 'Heavy rainfall expected' },
+    { name: 'Hyderabad - Landslide', lat: 17.3850, lon: 78.4867, type: 'landslide', severity: 'critical', message: 'Landslide risk high' }
+];
+
 // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
@@ -14,10 +28,120 @@ document.addEventListener('DOMContentLoaded', function() {
 // Main initialization function
 function initializeApp() {
     setupEventListeners();
+    initializeMap();
     startRealTimeUpdates();
     initializeTooltips();
     if (USE_BACKEND) {
         fetchAlertsFromBackend();
+    }
+}
+
+// Initialize Real Map with Leaflet
+function initializeMap() {
+    // Create map centered on India
+    map = L.map('realMap').setView([20.5937, 78.9629], 5);
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+    
+    // Create marker group
+    markerGroup = L.featureGroup().addTo(map);
+    
+    // Add all disaster zones to map
+    DISASTER_ZONES.forEach((zone, index) => {
+        addDisasterMarker(zone, index);
+    });
+}
+
+// Add disaster marker with popup
+function addDisasterMarker(zone, index) {
+    // Determine marker color based on severity
+    const markerColor = zone.severity === 'critical' ? '#ff4757' : '#ffa502';
+    
+    // Create custom marker HTML
+    const markerHtml = `
+        <div class="custom-marker" style="
+            background-color: ${markerColor};
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            ${zone.severity === 'critical' ? 'animation: blink 1s infinite;' : ''}
+        ">
+            <i class="fas fa-exclamation" style="color: white; font-size: 14px;"></i>
+        </div>
+    `;
+    
+    // Create marker
+    const marker = L.marker([zone.lat, zone.lon], {
+        icon: L.divIcon({
+            html: markerHtml,
+            iconSize: [36, 36],
+            className: 'disaster-marker'
+        }),
+        title: zone.name
+    });
+    
+    // Add popup
+    const popupContent = `
+        <div style="font-size: 12px;">
+            <h4 style="margin: 0 0 5px 0; color: #333;">${zone.name}</h4>
+            <p style="margin: 3px 0; color: #666;">
+                <strong>Type:</strong> ${zone.type.toUpperCase()}
+            </p>
+            <p style="margin: 3px 0; color: #666;">
+                <strong>Severity:</strong> <span style="color: ${zone.severity === 'critical' ? '#ff4757' : '#ffa502'}; font-weight: bold;">${zone.severity.toUpperCase()}</span>
+            </p>
+            <p style="margin: 3px 0; color: #666;">
+                <strong>Alert:</strong> ${zone.message}
+            </p>
+            <p style="margin: 5px 0 0 0; font-size: 11px; color: #999;">
+                Coordinates: ${zone.lat.toFixed(4)}, ${zone.lon.toFixed(4)}
+            </p>
+        </div>
+    `;
+    
+    marker.bindPopup(popupContent);
+    
+    // Add click event to show alert details
+    marker.on('click', function() {
+        createAlertInBackend(zone.type, zone.severity, zone.name, zone.message, { lat: zone.lat, lon: zone.lon });
+    });
+    
+    // Add to marker group
+    markerGroup.addLayer(marker);
+}
+
+// Set user's current location
+function setUserLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            
+            // Add user marker
+            L.marker([lat, lon], {
+                icon: L.icon({
+                    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    shadowSize: [41, 41],
+                    iconAnchor: [12, 41]
+                }),
+                title: 'Your Location'
+            }).bindPopup('Your Current Location').addTo(map);
+            
+            // Center map on user
+            map.setView([lat, lon], 7);
+        });
     }
 }
 

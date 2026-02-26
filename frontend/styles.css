@@ -601,3 +601,46 @@ body {
     background: linear-gradient(to right, #f0f0f0 4%, #e0e0e0 25%, #f0f0f0 36%);
     background-size: 1000px 100%;
 }
+
+/* Blinking Animation for Disaster Markers */
+@keyframes blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0.3; }
+}
+
+.disaster-marker {
+    animation: blink 1s infinite;
+}
+
+/* Map Styles */
+#realMap {
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.custom-marker {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.leaflet-popup-content {
+    font-family: 'Inter', sans-serif;
+    padding: 0 !important;
+}
+
+.leaflet-popup-content-wrapper {
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.leaflet-popup-tip {
+    background-color: white;
+}
+
+.map-container {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin: 1.5rem 0;
+}
